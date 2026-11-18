@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Немецкие флешкарточки</title>
+    <style>
+        /* --- ЦВЕТОВАЯ ПАЛИТРА --- */
+        :root {
+            --bg-color: #121212;
+            --card-front-bg: #F8F6F0;
+            --card-front-text: #1A1A1A;
+            --card-back-bg: #6B1D2C;
+            --card-back-text: #FFFFFF;
+            --btn-bg: #4A131E;
+            --btn-hover: #6B1D2C;
+            --btn-disabled: #2A2A2A;
+            --text-muted: #888888;
+            --tab-active: #6B1D2C;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+            background: radial-gradient(circle at center, #1f1f1f 0%, var(--bg-color) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-muted);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 550px;
+        }
+
+        /* --- ПЕРЕКЛЮЧАТЕЛЬ КОЛОД --- */
+        .tabs {
+            display: flex;
+            background-color: #1A1A1A;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 25px;
+            width: 100%;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .tab.active {
+            background-color: var(--tab-active);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(107, 29, 44, 0.4);
+        }
+
+        /* --- КАРТОЧКА --- */
+        .flashcard {
+            width: 100%;
+            height: 350px;
+            perspective: 1200px;
+            cursor: pointer;
+            margin-bottom: 25px;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+        }
+
+        .flashcard.is-flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .flashcard-front {
+            background-color: var(--card-front-bg);
+            color: var(--card-front-text);
+            border: 2px solid #D1C8C0;
+        }
+
+        .flashcard-back {
+            background-color: var(--card-back-bg);
+            color: var(--card-back-text);
+            transform: rotateY(180deg);
+            border: 2px solid #8C2C3E;
+        }
+
+        .card-text {
+            font-size: 1.6rem;
+            line-height: 1.4;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            word-wrap: break-word;
+            overflow-y: auto;
+        }
+
+        .flashcard-back .card-text {
+            font-size: 1.4rem; 
+            font-weight: 500;
+        }
+        
+        .card-subtext {
+            font-size: 0.95rem;
+            margin-top: 20px;
+            opacity: 0.6;
+            font-style: italic;
+        }
+
+        /* --- КНОПКИ И ИНТЕРФЕЙС --- */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        button.control-btn {
+            flex: 1;
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--btn-bg);
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        button.control-btn:hover:not(:disabled) {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(107, 29, 44, 0.4);
+        }
+
+        button.control-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button.control-btn:disabled {
+            background-color: var(--btn-disabled);
+            color: #555;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .shuffle-btn {
+            width: 100%;
+            background-color: transparent;
+            border: 1px solid var(--btn-bg);
+            color: var(--text-muted);
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .shuffle-btn:hover {
+            background-color: rgba(107, 29, 44, 0.2);
+            color: #fff;
+        }
+
+        .counter {
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Переключатель -->
+    <div class="tabs">
+        <button class="tab active" id="tab-words" onclick="switchDeck('words')">Слова (26)</button>
+        <button class="tab" id="tab-phrases" onclick="switchDeck('phrases')">Выражения</button>
+    </div>
+
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-inner">
+            <div class="flashcard-front">
+                <div class="card-text" id="front-text">Загрузка...</div>
+                <div class="card-subtext" id="front-subtext">Нажмите, чтобы перевернуть</div>
+            </div>
+            <div class="flashcard-back">
+                <div class="card-text" id="back-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" id="prev-btn" onclick="prevCard()" disabled>← Назад</button>
+        <button class="control-btn" id="next-btn" onclick="nextCard()">Далее →</button>
+    </div>
+
+    <button class="shuffle-btn" onclick="shuffleCards()">🔀 Перемешать</button>
+
+    <div class="counter" id="counter">0 / 0</div>
+</div>
+
+<script>
+    // 1. ВАША ИСХОДНАЯ КОЛОДА (26 слов, ничего не удалено)
+    const wordsData = [
+        { ru: "ответственность", de: "die Verantwortung, -, -en" },
+        { ru: "брать (взять) на себя ответственность", de: "eine Verantwortung übernehmen" },
+        { ru: "быть ответственным за ребенка", de: "für ein Kind verantwortlich sein" },
+        { ru: "вести себя", de: "sich verhalten, verhielt sich, hat sich verhalten" },
+        { ru: "поведение, отношение", de: "das Verhalten, -s" },
+        { ru: "пренебрегать, не уделять внимания", de: "vernachlässigen, vernachlässigte, hat vernachlässigt" },
+        { ru: "пренебрегать своими обязанностями", de: "seine Pflichten vernachlässigen" },
+        { ru: "помириться, примириться, мириться", de: "sich versöhnen, versöhnte sich, hat sich versöhnt" },
+        { ru: "обеспечивать", de: "versorgen, versorgte, hat versorgt" },
+        { ru: "ладить; уживаться; терпеть, переносить", de: "sich vertragen, vertrug sich, hat sich vertragen" },
+        { ru: "совершеннолетний", de: "volljährig" },
+        { ru: "брачный возраст", de: "das Heiratsalter" },
+        { ru: "семейные праздники", de: "die Familienfeste" },
+        { ru: "вырастать; в хороших / плохих условиях", de: "aufwachsen, wuchs auf, ist aufgewachsen; in guten / schlechten Verhältnissen aufwachsen" },
+        { ru: "заботиться о (ком-л.), ухаживать за (кем-л.); уход, забота", de: "betreuen, betreute, hat betreut jemanden (Akk.); die Betreuung, -, -en" },
+        { ru: "одинокий", de: "einsam" },
+        { ru: "взрослый; взрослый / взрослая", de: "erwachsen; ein erwachsener Mensch; der / die Erwachsene, -n, -n" },
+        { ru: "воспитывать; воспитание", de: "erziehen, erzog, hat erzogen; die Erziehung, -" },
+        { ru: "поколение", de: "die Generation, -, -en" },
+        { ru: "подрастать", de: "heranwachsen, wuchs heran, ist herangewachsen / groß werden" },
+        { ru: "злиться на (кого-л. / что-л.); досада, гнев", de: "sich ärgern, ärgerte sich, hat sich geärgert über jemanden / etwas (Akk.); der Ärger, -s" },
+        { ru: "духовный, умственный", de: "geistig" },
+        { ru: "заботиться о (ком-л.)", de: "sich kümmern, kümmerte sich, hat sich gekümmert um jemanden (Akk.)" },
+        { ru: "несовершеннолетний", de: "minderjährig" },
+        { ru: "ссориться", de: "sich streiten, stritt sich, hat sich gestritten" },
+        { ru: "предоставлять; быть предоставленным самому себе", de: "überlassen, überließ, hat überlassen; sich (Dat.) selbst überlassen sein" }
+    ];
+
+    // 2. НОВАЯ КОЛОДА: ТОЛЬКО УСТОЙЧИВЫЕ ВЫРАЖЕНИЯ
+    const phrasesData = [
+        { ru: "брать (взять) на себя ответственность", de: "eine Verantwortung übernehmen" },
+        { ru: "быть ответственным за ребенка", de: "für ein Kind verantwortlich sein" },
+        { ru: "пренебрегать своими обязанностями", de: "seine Pflichten vernachlässigen" },
+        { ru: "вырастать в хороших / плохих условиях", de: "in guten / schlechten Verhältnissen aufwachsen" },
+        { ru: "становиться взрослым, вырастать", de: "groß werden" },
+        { ru: "злиться на кого-л. / что-л.", de: "sich ärgern über jemanden / etwas (Akk.)" },
+        { ru: "заботиться о ком-л.", de: "sich kümmern um jemanden (Akk.)" },
+        { ru: "быть предоставленным самому себе", de: "sich (Dat.) selbst überlassen sein" }
+    ];
+
+    // Текущее состояние
+    let currentDeckType = 'words'; 
+    let activeCards = [...wordsData]; 
+    let currentIndex = 0;
+    let isFlipped = false;
+
+    // DOM Элементы
+    const flashcard = document.getElementById('flashcard');
+    const frontText = document.getElementById('front-text');
+    const backText = document.getElementById('back-text');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const counter = document.getElementById('counter');
+    const tabWords = document.getElementById('tab-words');
+    const tabPhrases = document.getElementById('tab-phrases');
+
+    // Переключение колоды
+    function switchDeck(type) {
+        if (currentDeckType === type) return;
+
+        currentDeckType = type;
+        currentIndex = 0;
+        
+        flashcard.classList.remove('is-flipped');
+        isFlipped = false;
+
+        if (type === 'words') {
+            tabWords.classList.add('active');
+            tabPhrases.classList.remove('active');
+            activeCards = [...wordsData]; 
+        } else {
+            tabPhrases.classList.add('active');
+            tabWords.classList.remove('active');
+            activeCards = [...phrasesData]; 
+        }
+
+        setTimeout(updateCard, 300);
+    }
+
+    // Обновление карточки
+    function updateCard() {
+        if (isFlipped) {
+            flashcard.classList.remove('is-flipped');
+            isFlipped = false;
+        }
+        
+        setTimeout(() => {
+            const currentCard = activeCards[currentIndex];
+            frontText.textContent = currentCard.ru;
+            backText.textContent = currentCard.de;
+            
+            counter.textContent = `${currentIndex + 1} / ${activeCards.length}`;
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === activeCards.length - 1;
+        }, isFlipped ? 300 : 0);
+    }
+
+    function flipCard() {
+        flashcard.classList.toggle('is-flipped');
+        isFlipped = !isFlipped;
+    }
+
+    function nextCard() {
+        if (currentIndex < activeCards.length - 1) {
+            currentIndex++;
+            updateCard();
+        }
+    }
+
+    function prevCard() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateCard();
+        }
+    }
+
+    // Перемешивание
+    function shuffleCards() {
+        if (isFlipped) {
+            flashcard.classList.remove('is-flipped');
+            isFlipped = false;
+        }
+
+        for (let i = activeCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [activeCards[i], activeCards[j]] = [activeCards[j], activeCards[i]];
+        }
+
+        currentIndex = 0;
+        setTimeout(updateCard, 300);
+    }
+
+    // Инициализация
+    updateCard();
+</script>
+
+</body>
+</html>
